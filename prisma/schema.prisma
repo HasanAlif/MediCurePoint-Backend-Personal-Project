@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPEND
+  BLOCKED
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+model User {
+  id String @id @default(uuid())
+
+  fullName       String  @db.VarChar(100)
+  email          String  @unique @db.VarChar(255)
+  mobileNumber   String? @db.VarChar(20)
+  password       String? @db.VarChar(255)
+  profilePicture String? @db.VarChar(500)
+
+  role         UserRole     @default(PATIENT)
+  status       UserStatus   @default(ACTIVE)
+  authProvider AuthProvider @default(LOCAL)
+
+  isDeleted  Boolean @default(false)
+  isVerified Boolean @default(false)
+
+  verificationOtp        String?   @db.VarChar(10)
+  verificationOtpExpiry  DateTime?
+  resetPasswordOtp       String?   @db.VarChar(10)
+  resetPasswordOtpExpiry DateTime?
+
+  googleId String? @db.VarChar(255)
+
+  premiumPlanExpiry DateTime?
+  isEnjoyedTrial    Boolean   @default(false)
+
+  country        String? @db.VarChar(100)
+  currency       String? @db.VarChar(10)
+  language       String? @db.VarChar(10)
+  timezone       String? @db.VarChar(50)
+  monthStartDate Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([role], name: "idx_user_role")
+  @@index([status], name: "idx_user_status")
+  @@index([mobileNumber], name: "idx_user_mobile")
+  @@index([googleId], name: "idx_user_google_id")
+  @@index([isDeleted], name: "idx_user_is_deleted")
+  @@map("users")
+}
+
+model Speciality {
+  id String @id @default(uuid())
+
+  title       String  @unique @db.VarChar(255)
+  description String? @db.Text
+  icon        String? @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted], name: "idx_speciality_is_deleted")
+  @@index([title], name: "idx_speciality_title")
+  @@map("specialities")
+}
